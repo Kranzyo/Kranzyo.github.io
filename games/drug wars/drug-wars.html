@@ -1,0 +1,1665 @@
+<!DOCTYPE html><html><head><title>Drug Wars</title><meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui=1"><meta charset="UTF-8"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="description" content=""><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="icon64.png"><link rel="apple-touch-icon" sizes="180x180" href="icon180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon32.png"><link rel="icon" type="image/png" sizes="16x16" href="icon16.png"><style>html,body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  overflow:hidden;
+  font-family: Verdana;
+}
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#canvaswrapper {
+  text-align: center ;
+}
+</style><style>@font-face { font-family: "BitCell" ; src: url("fonts/BitCell.ttf") format("truetype"); }</style><script>window.fonts = ["BitCell"]</script></head><body class="noselect custom-cursor" oncontextmenu="return false;"><div id="canvaswrapper"></div><script type="text/javascript">var resources = {"images":[{"file":"icon.png","version":111,"size":146,"properties":{"frames":1,"fps":5}},{"file":"loansharkpixelated.png","version":1,"size":18616,"properties":{}}],"assets":[],"maps":{},"sounds":[],"music":[]};
+var graphics = "M1";
+
+</script><script type="text/javascript">var orientation = 'landscape' ;
+var aspect = 'free' ;
+var ms_libs = [] ;
+window.skip_service_worker = true;
+window.exported_project = true;
+window.ms_use_server = false ;
+</script><script src="compiler.js"></script><script src="parser.js"></script><script src="processor.js"></script><script src="program.js"></script><script src="routine.js"></script><script src="runner.js"></script><script src="token.js"></script><script src="tokenizer.js"></script><script src="transpiler.js"></script><script src="microengine.js"></script></body><script type="text/javascript">//
+//
+// The game is started with the code below.
+// Once you have received the "started" signal (see below),
+// you can do the following:
+// 1) Inject functions or objects into the global context of the microStudio engine, example:
+//
+//   window.player.setGlobal("special_callback",function(x) { console.info(x) }) ;
+//   // Your microScript code can now call the "special_callback" function
+//
+// 2) Call microScript global functions from your JavaScript code, example:
+//
+//   window.player.call("call_me_from_javascript",[10,1000]) ;
+//   // arguments to the function call are provided as an array
+//
+// 3) Run a microScript code snippet from your JavaScript code, example:
+//
+//   window.player.exec("player.position_x = 50",function(result) { console.log(result) ; }) ;
+//
+
+window.addEventListener("load",function() {
+  window.player = new Player(function(event) {
+    if (event.name == "started") {
+      // signal that the game is started
+    }
+    else if (event.name == "log") {
+      // console.info(event.data) ;
+    }
+  }) ;
+  document.body.focus() ;
+}) ;
+
+</script><script id="code" type="text/x-microscript">
+
+
+function()
+/*
+MSPLUS VERSION 2.1.0
+changelog: https://microstudio.dev/community/project-sharing/microscript/417/
+Free to use, though credit is appreciated
+*/
+
+rand = function(a, b)
+  // if you only enter one parameter
+  if not b then
+    // set the range to 0-[parameter]
+    b = a
+    a = 0
+  elsif not a then
+    // and if you enter none,
+    // randomize, from zero to one.
+    // I'm fitting in a lil aabccb rhyme.
+    // You can't add one of those
+    // very much in code
+    // all the time.
+    b = 1
+    a = 0
+  end
+  return random.next()*(b-a)+a
+end
+
+chance = function(percent=50)
+  return rand() <= percent/100
+end
+
+arrayPercents = function(ary)
+  local percents = object end
+  for item in ary
+    percents[""+item] += 100/ary.length
+  end
+  return percents
+end
+
+mean = function(ary)
+  local tally = 0
+  local numNums = 0
+  for item in ary
+    if item.type == "number" then
+      tally += item
+      numNums += 1
+    end
+  end
+  return tally/numNums
+end
+
+average = mean
+
+median = function(ary)
+  local array = ary.sort(function(a,b)a>b end)
+  if not divisible(array.length, 2) then
+    return array[(array.length+1)/2]
+  else
+    return (array[array.length/2-1]+array[array.length/2])/2
+  end
+end
+
+mode = function(ary)
+  local obj = arrayPercents(ary)
+  maxObj = ""
+  for item in obj
+    if obj[maxObj] < obj[item] then
+      maxObj = item
+    end
+  end
+  return maxObj
+end
+
+divisible = function(num, divisor)
+  return num%divisor == 0
+end
+
+roundTo = function(num, mark=1)
+  return round(num/mark)*mark
+end
+
+lerp = function(a, b, amt=0.5)
+  return a*(1-amt)+b*amt
+end
+
+clamp = function(num, l, h)
+  return min(max(min(l, h), num), max(l, h))
+end
+
+mod = function(num, lim)
+  return num-lim*floor(num/lim)
+end
+
+sign = function(num)
+  return (num>0)-(num<0)
+end
+
+map = function(num, l1, h1, l2, h2)
+  return (num-l1)*(h2-l2)/(h1-l1)+l2
+end
+
+map2d = function(x, y, lx1, hx1, ly1, hy1, lx2, hx2, ly2, hy2)
+  return object
+    x = map(x, lx1, hx1, lx2, hx2)
+    y = map(y, ly1, hy1, ly2, hy2)
+  end
+end
+
+dist = function(x1, y1, x2, y2)
+  return sqrt((x2-x1)^2+(y2-y1)^2)
+end
+
+dir = function(x1, y1, x2, y2)
+  return atan2d(y2-y1, x2-x1)
+end
+
+rgb = function(r, g, b)
+  return "rgb("+r+", "+g+", "+b+")"
+end
+
+rgba = function(r, g, b, a)
+  return "rgba("+r+", "+g+", "+b+", "+a+")"
+end
+
+multiPrint = function(lines)
+  print("------------ MultiPrint:")
+  for line in lines
+    print(line)
+  end
+  print("------------------------")
+end
+
+timer = class
+  constructor = function(ms=1)
+    this.time = 0
+    this.on = 1
+    this.timeLoop = every ms milliseconds do 
+      this.time = this.time + 1
+    end
+  end
+  
+  setTime = function(newTime)
+    if newTime.type == "number" then
+      this.time = newTime
+    end
+  end
+  
+  timePast = function(timeCheck)
+    return this.time >= timeCheck
+  end
+  
+  setSpeed = function(newMs)
+    if this.on and newMs.type = "number" then
+      this.timeLoop.stop()
+      this.timeLoop = every newMs milliseconds do
+       this.time += 1
+      end
+    end
+  end
+  
+  pause = function()
+    this.timeLoop.pause()
+  end
+  
+  resume = function()
+    this.timeLoop.resume()
+  end
+  
+  stop = function()
+    this.on = 0
+    this.timeLoop.stop()
+  end
+end
+
+countdown = class
+  constructor = function(ms)
+    this.time = ms
+    this.isUp = 0
+    this.timeLoop = every 1 milliseconds do
+      this.time -= 1
+      this.isUp = this.time<=0
+    end
+  end
+  
+  setTime = function(newTime)
+    if newTime.type == "number" then
+      this.time = newTime
+    end
+  end
+  
+  pause = function()
+    this.timeLoop.pause()
+  end
+  
+  resume = function()
+    this.timeLoop.resume()
+  end
+end
+
+vec = class
+  constructor = function(x, y)
+    this.x=x
+    this.y=y
+    this.dir=atan2d(y, x)
+    this.mag=sqrt(x^2+y^2)
+  end
+  
+  "+" = function(a, b)
+    return new vec2d(a.x+b[0], a.y+b[1])
+  end
+  
+  "-" = function(a, b)
+    return new vec2d(a.x-b.x, a.y-b.y)
+  end
+  
+  "*" = function(a, b)
+    return (a.x*b.x)+(a.y*b.y)
+  end
+  
+  normalize = function()
+    this.x = cos(this.dir)
+    this.y = sin(this.dir)
+    this.mag = 1
+  end
+end
+
+button = class
+  constructor = function(x, y, width, height, rounding, color, borderColor, pressedColor, pressedBorderColor)
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+    this.rounding = rounding
+    this.color = color
+    this.bColor = borderColor
+    this.pColor = pressedColor
+    this.pBColor = pressedBorderColor
+    this.pressed = false
+    this.press = false
+    this.release = false
+  end
+  
+  update = function()
+    local pPressed = this.pressed
+    this.press = false
+    this.release = false
+    if (abs(mouse.x-this.x) <= this.width/2) and (abs(mouse.y-this.y) <= this.height/2) and mouse.pressed then
+      this.pressed = true
+    else
+      this.pressed = false
+    end
+    if pPressed != this.pressed then
+      this.press = this.pressed
+      this.release = not this.pressed
+    end
+  end
+  
+  draw = function()
+    if this.pressed then
+      screen.fillRoundRect(this.x, this.y, this.width, this.height, this.rounding, this.pColor)
+      screen.drawRoundRect(this.x, this.y, this.width, this.height, this.rounding, this.pBColor)
+    else
+      screen.fillRoundRect(this.x, this.y, this.width, this.height, this.rounding, this.color)
+      screen.drawRoundRect(this.x, this.y, this.width, this.height, this.rounding, this.bColor)
+    end
+  end
+end
+
+scrollbar = class
+  constructor = function(x, y, width, height, color, barColor, scrollSpeed)
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+    this.color = color
+    this.bColor = barColor
+    this.speed = scrollSpeed
+    this.barHeight = clamp(height/10, width, 20)
+    this.minY = y-(height/2)+(this.barHeight/2)
+    this.maxY = y+(height/2)-(this.barHeight/2)
+    this.barY = this.maxY
+    this.progress = 0
+  end
+  
+  update = function()
+    if (abs(mouse.x-this.x) <= this.width/2) and mouse.pressed then
+      this.barY = mouse.y
+    end
+    if mouse.wheel != 0 then
+      this.barY = this.barY + (mouse.wheel * this.speed)
+    end
+    this.barY = clamp(this.barY, this.minY, this.maxY)
+    this.progress = map(this.barY, this.maxY, this.minY, 0, 1)
+  end
+  
+  draw = function()
+    screen.fillRoundRect(this.x, this.y, this.width, this.height, this.width, this.color)
+    screen.fillRoundRect(this.x, this.barY, this.width, this.barHeight, this.width, this.bColor)
+  end
+end
+
+slider = class
+  constructor = function(x, y, width, height, color, barColor, scrollSpeed)
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+    this.color = color
+    this.bColor = barColor
+    this.speed = scrollSpeed
+    this.barWidth = clamp(width/10, height, 20)
+    this.minX = x-(width/2)+(this.barWidth/2)
+    this.maxX = x+(width/2)-(this.barWidth/2)
+    this.barX = this.minX
+    this.progress = 0
+  end
+  
+  update = function()
+    if (abs(mouse.y-this.y) <= this.height/2) and mouse.pressed then
+      this.barX = mouse.x
+    end
+    if mouse.wheel != 0 then
+      this.barX = this.barX + (mouse.wheel * this.speed)
+    end
+    this.barX = clamp(this.barX, this.minX, this.maxX)
+    this.progress = map(this.barX, this.minX, this.maxX, 0, 1)
+  end
+  
+  draw = function()
+    screen.fillRoundRect(this.x, this.y, this.width, this.height, this.height, this.color)
+    screen.fillRoundRect(this.barX, this.y, this.barWidth, this.height, this.width, this.bColor)
+  end
+end
+
+dynamic = class
+  constructor = function(sprite, x, y, width, height)
+    this.sprite = sprite
+    this.px = x
+    this.x = x
+    this.dx = 0
+    this.py = y
+    this.y = y
+    this.dy = 0
+    this.width = width
+    this.height = height
+    this.pureWidth = width
+    this.pureHeight = height
+    this.rot = 0
+    this.alpha = 1
+    this.debug = 0
+    this.screenClamp = 0
+    this.keys = object
+      up = []
+      down = []
+      left = []
+      right = []
+      forward = []
+      backward = []
+      turnLeft = []
+      turnRight = []
+    end
+    this.walls = object end
+    this.vars = object end
+    this.touching = false
+  end
+  
+  setSprite = function(sprite)
+    this.sprite = sprite
+  end
+  
+  setPos = function(x, y)
+    this.x = x
+    this.y = y
+  end
+  
+  move = function(x, y)
+    this.x += x
+    this.y += y
+  end
+  
+  bindKey = function(key, dir, speed)
+    this.keys[dir].push([key, speed])
+  end
+  
+  removeBinds = function(dir)
+    this.keys[dir] = []
+  end
+  
+  setVar = function(name, value)
+    this.vars[name] = value
+  end
+  
+  getVar = function(name)
+    return this.vars[name]
+  end
+  
+  setForce = function(dx, dy)
+    if dx.dx.type == "number" and dx.dy.type == "number" then
+      this.dx = dx.dx
+      this.dy = dx.dy
+    elsif dx.x.type == "number" and dx.y.type == "number" then
+      this.dx = dx.x
+      this.dy = dx.y
+    elsif dx[0].type == "number" and dx[1].type == "number" then
+      this.dx = dx[0]
+      this.dy = dx[1]
+    elsif dx.type == "number" and dy.type == "number" then
+      this.dx = dx
+      this.dy = dy
+    end
+  end
+  
+  addForce = function(dx, dy)
+    if dx.dx.type == "number" and dx.dy.type == "number" then
+      this.dx += dx.dx
+      this.dy += dx.dy
+    elsif dx.x.type == "number" and dx.y.type == "number" then
+      this.dx += dx.x
+      this.dy += dx.y
+    elsif dx[0].type == "number" and dx[1].type == "number" then
+      this.dx += dx[0]
+      this.dy += dx[1]
+    elsif dx.type == "number" and dy.type == "number" then
+      this.dx += dx
+      this.dy += dy
+    end
+  end
+  
+  setRotation = function(rotation)
+    this.rot = rotation
+  end
+  
+  rotate = function(rotation)
+    this.rot += rotation
+  end
+  
+  setAlpha = function(alpha)
+    this.alpha = alpha
+  end
+  
+  changeAlpha = function(alpha)
+    this.alpha += alpha
+  end
+  
+  colliding = function(dynamic)
+    if abs(this.x-dynamic.x)<=abs(this.width+dynamic.width)/2 and abs(this.y-dynamic.y)<=abs(this.height+dynamic.height)/2 then
+      return true
+    else
+      return false
+    end
+  end
+  
+  toggleClamp = function()
+    this.screenClamp = not this.screenClamp
+  end
+  
+  setWall = function(key, x, y, width, height)
+    this.walls[key] = object
+      x = x
+      y = y
+      width = width
+      height = height
+    end
+  end
+  
+  touchingWall = function(key)
+    if key.type == "list" then
+      for i in key
+        if this.walls[i].touching then
+          return true
+        end
+      end
+      return false
+    else
+      return this.walls[key].touching
+    end
+  end
+  
+  touchingAny = function()
+    return this.touching
+  end
+  
+  getWall = function(key)
+    return this.walls[key]
+  end
+  
+  deleteWall = function(key)
+    local newObj = object end
+    for item in this.walls
+      if not (item == key) then
+        newObj[item] = this.walls[item]
+      end
+    end
+    this.walls = newObj
+  end
+  
+  toggleDebug = function()
+    this.debug = not this.debug
+  end
+  
+  update = function()
+    // local px = this.x
+    // local py = this.y
+    this.touching = false
+    this.width = lerp(this.pureWidth, this.pureHeight, abs(sind(this.rot)))
+    this.height = lerp(this.pureWidth, this.pureHeight, abs(cosd(this.rot)))
+    this.x += this.dx
+    this.y += this.dy
+    for i in this.keys.right
+      this.x += keyboard[i[0]]*i[1]
+    end
+    for i in this.keys.left
+      this.x -= keyboard[i[0]]*i[1]
+    end
+    for i in this.keys.up
+      this.y += keyboard[i[0]]*i[1]
+    end
+    for i in this.keys.down
+      this.y -= keyboard[i[0]]*i[1]
+    end
+    for i in this.keys.forward
+      this.x += cosd(this.rot)*i[1]*keyboard[i[0]]
+      this.y += sind(this.rot)*i[1]*keyboard[i[0]]
+    end
+    for i in this.keys.backward
+      this.x -= cosd(this.rot)*i[1]*keyboard[i[0]]
+      this.y -= sind(this.rot)*i[1]*keyboard[i[0]]
+    end
+    for i in this.keys.turnLeft
+      this.rot += keyboard[i[0]]*i[1]
+    end
+    for i in this.keys.turnRight
+      this.rot -= keyboard[i[0]]*i[1]
+    end
+    for wall in this.walls
+      local checkCollision = function()
+        return abs(this.x-this.walls[wall].x)<abs(this.width+this.walls[wall].width)/2 and abs(this.y-this.walls[wall].y)<abs(this.height+this.walls[wall].height)/2
+      end
+      this.walls[wall].touching = 0
+      if checkCollision() then
+        this.touching = true
+        this.walls[wall].touching = 1
+        while checkCollision()
+          this.x += (this.x>=this.walls[wall].x+this.walls[wall].width/2-3)+(this.x<this.walls[wall].x-this.walls[wall].width/2+3)*-1
+          this.y += (this.y>this.walls[wall].y+this.walls[wall].height/2-3)+(this.y<this.walls[wall].y-this.walls[wall].height/2+3)*-1
+        end
+        this.dx = this.dx*(abs(pastX-this.x)<5)*0.75
+        this.dy = this.dy*(abs(pastY-this.y)<5)*0.75
+      end
+    end
+    // for wall in this.walls
+    //   local checkCollision = function(x, y)
+    //     return abs(x-this.walls[wall].x)<abs(this.width+this.walls[wall].width)/2 and abs(y-this.walls[wall].y)<abs(this.height+this.walls[wall].height)/2
+    //   end
+    //   this.walls[wall].touching = 0
+    //   if checkCollision(this.x, this.y) then
+    //     this.touching = true
+    //     this.walls[wall].touching = 1
+    //     if checkCollision(this.x, py) then
+    //       local backDir = sign(px-this.x)
+    //       while checkCollision(this.x, py)
+    //         this.x += backDir
+    //       end
+    //       this.dx = 0
+    //     end
+    //     if checkCollision(px, this.y) then
+    //       local backDir = sign(py-this.y)
+    //       while checkCollision(px, this.y)
+    //         this.y += backDir
+    //       end
+    //       this.dy = 0
+    //     end
+    //   end
+    // end
+    if this.screenClamp then
+      local updX = clamp(this.x, -screen.width/2+this.width/2, screen.width/2-this.width/2)
+      local updY = clamp(this.y, -screen.height/2+this.height/2, screen.height/2-this.height/2)
+      if this.x != updX then
+        this.dx = 0
+        this.touching = true
+      end
+      if this.y != updY then
+        this.dy = 0
+        this.touching = true
+      end
+      this.x = updX
+      this.y = updY
+    end
+  end
+  
+  draw = function()
+    screen.setDrawRotation(this.rot)
+    screen.setAlpha(this.alpha)
+    screen.drawSprite(this.sprite, this.x, this.y, this.pureWidth, this.pureHeight)
+    screen.setAlpha(1)
+    screen.setDrawRotation(0)
+    if this.debug then
+      screen.drawRect(this.x, this.y, this.width, this.height, "#f00")
+      screen.fillRect(this.x, this.y, this.width, this.height, "rgba(255, 0, 0, 0.25)")
+      for wall in this.walls
+        screen.drawRect(this.walls[wall].x, this.walls[wall].y, this.walls[wall].width, this.walls[wall].height, "#f80")
+        screen.fillRect(this.walls[wall].x, this.walls[wall].y, this.walls[wall].width, this.walls[wall].height, "rgba(240, 112, 0, 0.25)")
+        screen.drawLine(this.x, this.y, this.walls[wall].x, this.walls[wall].y, "#f80")
+      end
+    end
+  end
+end
+
+complex = class
+  constructor = function(real, imaginary)
+    this.r = real
+    this.i = imaginary
+  end
+  
+  "+" = function(a, b)
+    if a.type == "number" then
+      a = complex(a, 0)
+    end
+    if b.type == "number" then
+      b = complex(b, 0)
+    end
+    return new complex(a.r+b.r, a.i+b.i)
+  end
+  
+  "-" = function(a, b)
+    if a.type == "number" then
+      a = complex(a, 0)
+    end
+    if b.type == "number" then
+      b = complex(b, 0)
+    end
+    return new complex(a.r-b.r, a.i-b.i)
+  end
+  
+  "*" = function(a, b)
+    if a.type == "number" then
+      a = complex(a, 0)
+    end
+    if b.type == "number" then
+      b = complex(b, 0)
+    end
+    return new complex(a.r*b.r-a.i*b.i, a.r*b.i+a.i*b.r)
+  end
+  
+  "/" = function(a, b)
+    if a.type == "number" then
+      a = complex(a, 0)
+    end
+    if b.type == "number" then
+      b = complex(b, 0)
+    end
+    return new complex((a.r*b.r+a.i*b.i)/(b.r^2+b.i^2), (a.i*b.r-a.r*b.i)/(b.r^2+b.i^2))
+  end
+  
+  string = function()
+    return this.r+" + "+this.i+"i"
+  end
+end
+
+String."*" = function(a,b)
+  if b <= 0 then
+    return ""
+  end
+  if b.type == "number" then
+    local temp = a
+    for i = 2 to b by 1
+      temp += a
+    end
+    return temp
+  end
+end
+
+String.replace = function(i, i2, str)
+  return this.substring(0, i) + str + this.substring(i2, this.length-1)
+end // "this" attempts to get global "this" instead of the current string, bug report: https://microstudio.dev/community/bugs/string-prototype-functions-do-not-properly-recieve-this-keyword/449/
+
+List.random = function()
+  return this[random.nextInt(this.length)]
+end
+
+List.clone = function()
+  return this+[]
+end
+
+List.removeIf = function(condition)
+  local removals = []
+  local removalIds = []
+  local id = 0
+  for item in this
+    if condition(item, id) then
+      removals.push(item)
+      removalIds.push(id)
+    end
+    id += 1
+  end
+  removalIds.sortList(function(a, b) return b-a end)
+  for removal in removalIds
+    this.removeAt(removal)
+  end
+  return removals
+end
+
+Object.clone = function()
+  local returnObj = object end
+  for attr in this
+    returnObj[attr] = this[attr]
+  end
+  return returnObj
+end
+
+Object.removeIf = function(condition)
+  local removals = object end
+  for attr in this
+    if condition(this[attr], attr) then
+      removals[attr] = this[attr]
+    end
+  end
+  for removal in removals
+    delete this[removal]
+  end
+  return removals
+end
+
+arrowX = 0
+arrowY = 0
+wasdX = 0
+wasdY = 0
+allX = 0
+allY = 0
+
+milliseconds = 0
+seconds = 0
+
+i = new complex(0, 1)
+imgry = new complex(0, 1)
+imgnry = new complex(0, 1)
+imaginary = new complex(0, 1)
+
+privateVar = object
+  startMilliseconds = system.time()
+  containsUpd = false
+end
+
+updmsplus = function()
+  arrowX = keyboard.ARROW_RIGHT-keyboard.ARROW_LEFT
+  arrowY = keyboard.ARROW_UP-keyboard.ARROW_DOWN
+  wasdX = keyboard.KEY_D-keyboard.KEY_A
+  wasdY = keyboard.KEY_W-keyboard.KEY_S
+  allX = keyboard.RIGHT-keyboard.LEFT
+  allY = keyboard.UP-keyboard.DOWN
+  if allX and not wasdX and not arrowX then
+    arrowX = allX
+  end
+  if allY and not wasdY and not arrowY then
+    arrowY = allY
+  end
+  milliseconds = system.time()-privateVar.startMilliseconds
+  seconds = floor(milliseconds/1000)
+  privateVar.containsUpd = true
+end
+
+after 1000 milliseconds do
+  if not privateVar.containsUpd then
+    every 1 milliseconds do
+      updmsplus()
+    end
+  end
+end
+end()
+
+
+
+function()
+CButton = class
+  constructor = function(x, y, diameter, color)
+    this.x = x
+    this.y = y
+    
+    this.diameter = diameter
+    radius = diameter/2
+    
+    this.color = color
+    
+    border = false
+    
+    text = ""
+    textColor ="rgb(255,255,255)"
+    textSize = 10
+    
+    canUse = true
+  end
+  
+  distance = function(x_1, y_1, x_2, y_2)
+    local dx = x_2 - x_1
+    local dy = y_2 - y_1
+    local distance = sqrt(pow(dx, 2) + pow(dy, 2))
+    return distance
+  end
+  
+  press = function()
+    if canUse then
+      if touch.press then
+        if distance(x, y, touch.x, touch.y) <= radius then
+          return true
+        end
+      end
+    end
+  end
+  
+  keepPress = function()
+    if canUse then
+      if touch.touching then
+        if distance(x, y, touch.x, touch.y) <= radius then
+          return true
+        end
+      end
+    end
+  end
+  
+  release = function()
+    if canUse then
+      if touch.release then
+        if distance(x, y, touch.x, touch.y) <= radius then
+          return true
+        end
+      end
+    end
+  end
+  
+  mouseOver = function()
+    if canUse then
+      if distance(x, y, mouse.x, mouse.y) <= radius then
+        return true
+      end
+    end
+  end
+  
+  addText = function(text, size, color)
+    this.text = text
+    textSize = size
+    textColor = color
+  end
+  
+  draw = function()
+    screen.fillRound(x, y, diameter, diameter, color)
+    
+    if border then
+      screen.drawRound(x, y, diameter, diameter,"rgb(0,0,0)")
+    end
+    
+    screen.drawText(text, x, y, textSize, textColor)
+  end
+end
+
+end()
+
+
+
+function()
+HealthBar = class
+  constructor = function(sprite, x, y, length, height, quantity, distance)
+    this.sprite = sprite
+    
+    this.x = x
+    this.y = y
+    
+    this.length = length
+    this.height = height
+    
+    this.quantity = quantity
+    
+    this.distance = distance
+  end
+  
+  draw = function()
+    for xx = 0 to quantity-1
+      screen.drawSprite(sprite, x + xx*distance, y, length, height)
+    end
+  end
+end
+
+end()
+
+
+
+function()
+ProgressBar = class
+  constructor = function(x, y, length, height, target, color1, color2)
+    this.x = x
+    this.y = y
+    
+    this.length = length
+    this.height = height
+    
+    this.target = target
+    percentage = 0
+    
+    this.color1 = color1
+    this.color2 = color2
+    
+    border = false
+  end
+  
+  update = function(progress)
+    percentage = progress * 100 / target
+  end
+  
+  complete = function()
+    if percentage >= 100 then
+      return true
+    end
+    
+    return false
+  end
+  
+  draw = function()
+    screen.fillRect(x, y, length, height, color1)
+    screen.fillRect(x - (length - percentage/100 * length)/2, y, percentage/100 * length, height, color2)
+    
+    if border then
+      screen.drawRect(x, y, length, height,"rgb(0,0,0)")
+    end
+  end
+end
+end()
+
+
+
+function()
+RButton = class
+  constructor = function(x, y, length, height, color)
+    this.x = x
+    this.y = y
+    
+    this.length = length
+    this.height = height
+    
+    this.color = color
+    
+    border = false
+    
+    text = ""
+    textColor ="rgb(255,255,255)"
+    textSize = 10
+    
+    canUse = true
+  end
+  
+  press = function()
+    if canUse then
+      if touch.press then
+        if abs(touch.x - x) <= length/2 and abs(touch.y - y) <= height/2 then
+          return true
+        end
+      end
+    end
+  end
+  
+  keepPress = function()
+    if canUse then
+      if touch.touching then
+        if abs(touch.x - x) <= length/2 and abs(touch.y - y) <= height/2 then
+          return true
+        end
+      end
+    end
+  end
+  
+  release = function()
+    if canUse then
+      if touch.release then
+        if abs(touch.x - x) <= length/2 and abs(touch.y - y) <= height/2 then
+          return true
+        end
+      end
+    end
+  end
+  
+  mouseOver = function()
+    if canUse then
+      if abs(mouse.x - x) <= length/2 and abs(mouse.y - y) <= height/2 then
+        return true
+      end
+    end
+  end
+  
+  addText = function(text, size, color)
+    this.text = text
+    textSize = size
+    textColor = color
+  end
+  
+  draw = function()
+    screen.fillRect(x, y, length, height, color)
+    
+    if border then
+      screen.drawRect(x, y, length, height,"rgb(0,0,0)")
+    end
+    
+    screen.drawText(text, x, y, textSize, textColor)
+  end
+end
+
+end()
+
+
+
+function()
+Slider = class
+  constructor = function(x, y, length, maxValue)
+    this.x = x
+    this.y = y
+    
+    sx = x - length/2
+    
+    this.length = length
+    
+    this.maxValue = maxValue
+    
+    active = false
+  end
+  
+  update = function()
+    if active then
+      sx = touch.x
+      
+      if touch.release then
+        active = false
+      end
+    else
+      if touch.press then
+        if abs(touch.x - sx) <= 2.5 and abs(touch.y - y) <= 5 then
+          active = true
+        end
+      end
+    end
+    
+    if sx >= x + length/2 then
+      sx = x + length/2
+    end
+    
+    if sx <= x - length/2 then
+      sx = x - length/2
+    end
+  end
+  
+  getValue = function()
+    local percentage = (sx - (x - length/2))/length * 100
+    
+    return round(percentage/100 * maxValue)
+  end
+  
+  draw = function()
+    screen.fillRect(x, y, length, 3,"rgb(141,141,141)")
+    screen.fillRect(sx, y, 5, 10,"rgb(193,193,193)")
+  end
+end
+
+end()
+
+
+
+function()
+
+Drug = class
+  constructor = function(name, minPrice, maxPrice)
+    this.name = name
+    this.minPrice = minPrice
+    this.maxPrice = maxPrice
+    
+    // sets current price to value between minprice and maxprice
+    this.currentPrice = round(minPrice + (minPrice/2) * rand(0,1))
+  end
+  
+  ChangePrice = function()
+    this.currentPrice = round(rand(this.minPrice, this.maxPrice))
+  end
+end
+
+coke = new Drug("Coke", 15000, 28000)
+heroine = new Drug("Heroine", 5000, 12000)
+lsd = new Drug("LSD", 1000, 4200)
+weed = new Drug("Weed", 300, 720)
+speed = new Drug("Speed", 70, 220)
+ludes = new Drug("Ludes", 10, 50)
+
+drugs = [coke, heroine, lsd, weed, speed, ludes]
+coat = [cokeAmt = 0, heroineAmt = 0, lsdAmt = 0, weedAmt = 0, speedAmt = 0, ludesAmt = 0]
+coatTotal = 0
+coatMax = 100
+cash = 2000
+debt = 4200
+dayCount = 1
+location = "Bronx"
+buySellAmt = 1
+
+
+ChangePrices = function()
+  for drug in drugs
+    drug.ChangePrice()
+  end
+  debt *= 1.1
+  debt = round(debt)
+end
+
+UpdateCoatTotal = function()
+  coatTotal = 0
+  for item in coat
+    coatTotal += item
+  end
+end
+
+// EVENTS
+RandomEvent = class
+  constructor = function(text1, text2, buttons, textSize)
+    this.text1 = text1 or " "
+    this.text2 = text2 or " "
+    this.textSize = textSize or 9
+    this.buttons = buttons
+    this.ranOnce = false
+  end
+  
+  event = function()
+    
+  end
+  
+  yesBtnFunc = function()
+  end
+  
+  noBtnFunc = function()
+  end
+  
+  
+  draw = function()
+    screen.drawText(this.text1, 0, -70, this.textSize, "White")
+    screen.drawText(this.text2, 0, -80, this.textSize, "White")
+    if buttons then
+      randEventYesBtn.draw()
+      randEventNoBtn.draw()
+    end
+  end
+  
+end
+
+
+cheapLudes = new RandomEvent("RIVAL DEALERS ARE SELLING CHEAP LUDES!!!", , false)
+cheapLudes.event = function()
+  ludes.currentPrice = 2  
+end
+
+cheapWeed = new RandomEvent("WEED PRICES HAVE BOTTOMED-OUT!!!", , false)
+cheapWeed.event = function()
+  weed.currentPrice = 122
+end
+
+cheapHeroine = new RandomEvent("PIGS ARE SELLING CHEAP HEROINE!!!")
+cheapHeroine.event = function()
+  heroine.currentPrice = round(rand(850, 2000))
+end
+
+cheapLsd = new RandomEvent("THE MARKETS HAVE BEEN FLOODED WITH", "CHEAP HOME-MADE LSD")
+cheapLsd.event = function()
+  lsd.currentPrice = round(rand(250, 800))
+end
+
+
+expensiveHeroine = new RandomEvent("ADDICTS ARE BUYING HEROINE AT ", "OUTRAGEOUS PRICES!!!")
+expensiveHeroine.event = function()
+  heroine.currentPrice = round(rand(23000, 43000))
+end
+
+expensiveCoke = new RandomEvent("OPPS MADE A BIG COKE BUST!!!", "PRICES ARE OUTRAGEOUS")
+expensiveCoke.event = function()
+  coke.currentPrice = round(rand(80000, 140000))
+end
+
+mugged = new RandomEvent("You were mugged on the subway", "lost 500 bucks")
+mugged.event = function()
+  global.cash -= 500
+end
+
+newTrenchCoat = new RandomEvent("Will you buy a new trenchcoat with ", "more pockets for 300 bucks", true)
+newTrenchCoat.yesBtnFunc = function()
+  global.coatMax += 50
+  global.cash -= 300
+  newTrenchCoat.text1 = "gained 50 pockets"
+  newTrenchCoat.text2 = ""
+  global.currentEvent = nilEvent
+end
+
+foundItem
+if round(rand(0,1)) > 0.5 then
+  foundItem = lsd
+else
+  foundItem = heroine
+end
+
+
+foundSmth = new RandomEvent("You found 1 " + foundItem.name + "off a dead dude")
+foundSmth.event = function()
+  if foundItem.name == "Heroine" then
+    global.coat[1] += 1
+  else
+    global.coat[2] += 1
+  end
+end
+
+
+randomWeed = new RandomEvent("You find some weed that smells like", "good stuff will you smoke it?", true, 6.8)
+randomWeed.yesBtnFunc = function()
+  randomWeed.text1 = "You hallucinate on the wildest trip of your life"
+  randomWeed.text2 = "you stumble on subway tracks and get creamed by a train"
+  
+  global.cash = 2000
+  global.dayCount = 1
+  global.location = "Bronx"
+  global.debt = 4200
+  global.coatMax = 100
+  for i=0 to 5 
+    global.coat[i] = 0
+  end
+end
+
+
+
+nilEvent = new RandomEvent(" ", "", false)
+
+events = [newTrenchCoat, randomWeed, mugged, cheapLsd, cheapLudes, cheapWeed, cheapHeroine, expensiveCoke, expensiveHeroine, mugged, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent]
+
+ChooseEvent = function()
+  return events.random()
+end
+
+currentEvent = newTrenchCoat
+
+
+// Buttons
+Buttons = function()
+  // travelBtn = new RButton(-100, 90, 40, 10, "rgb(0,255,0)")
+  // travelBtn.addText("Travel", 10, "rgb(0,0,0)")
+  
+  bronxBtn = new RButton(-100, 80, 40, 10, "rgb(0,255,0)")
+  bronxBtn.addText("Bronx", 10, "rgb(0,0,0)")
+  
+  ghettoBtn = new RButton(-100, 50, 40, 10, "rgb(0,255,0)")
+  ghettoBtn.addText("Ghetto", 10, "rgb(0,0,0)")
+  
+  centralPBtn = new RButton(-100, 20, 40, 10, "rgb(0,255,0)")
+  centralPBtn.addText("Central Park", 7.5, "rgb(0,0,0)")
+  
+  manhattenBtn = new RButton(-100, -10, 40, 10, "rgb(0,255,0)")
+  manhattenBtn.addText("Manhatten", 8.5, "rgb(0,0,0)")
+  
+  coneyIslandBtn = new RButton(-100, -40, 40, 10, "rgb(0,255,0)")
+  coneyIslandBtn.addText("Coney Island", 7.6, "rgb(0,0,0)")
+  
+  brooklynBtn = new RButton(-100, -70, 40, 10, "rgb(0,255,0)")
+  brooklynBtn.addText("Brooklyn", 10, "rgb(0,0,0)")
+  
+  
+  amtPlusOneBtn = new RButton(68, 90, 10, 10, "rgb(0,255,0)")
+  amtPlusOneBtn.addText("+1", 8, "rgb(0,0,0)")
+  
+  amtPlusTenBtn = new RButton(80, 90, 10, 10, "rgb(0,255,0)")
+  amtPlusTenBtn.addText("+10", 8, "rgb(0,0,0)")
+
+  amtMinusOneBtn = new RButton(92, 90, 10, 10, "rgb(255,0,0)")
+  amtMinusOneBtn.addText("-1", 8, "rgb(0,0,0)")
+
+  amtMinusTenBtn = new RButton(104, 90, 10, 10, "rgb(255,0,0)")
+  amtMinusTenBtn.addText("-10", 8, "rgb(0,0,0)")
+
+  
+  
+  // BUY BUTTONS
+  
+  //coke
+  buyBtnC = new RButton(90, 70, 20, 10, "rgb(0,255,0")
+  buyBtnC.addText("Buy", 10, "rgb(0,0,0)")
+  
+  //heroine
+  buyBtnH = new RButton(90, 40, 20, 10, "rgb(0,255,0")
+  buyBtnH.addText("Buy", 10, "rgb(0,0,0)")
+  
+  //lsd
+  buyBtnLs = new RButton(90, 10, 20, 10, "rgb(0,255,0")
+  buyBtnLs.addText("Buy", 10, "rgb(0,0,0)")
+  
+  //weed
+  buyBtnW = new RButton(90, -20, 20, 10, "rgb(0,255,0")
+  buyBtnW.addText("Buy", 10, "rgb(0,0,0)")
+  
+  //speed
+  buyBtnS = new RButton(90, -50, 20, 10, "rgb(0,255,0")
+  buyBtnS.addText("Buy", 10, "rgb(0,0,0)")
+  
+  //ludes
+  buyBtnL = new RButton(90, -80, 20, 10, "rgb(0,255,0")
+  buyBtnL.addText("Buy", 10, "rgb(0,0,0)")
+  
+  // SELL BUTTONS
+  
+  //coke
+  sellBtnC = new RButton(120, 70, 20, 10, "rgb(255,0,0")
+  sellBtnC.addText("Sell", 10, "rgb(0,0,0)")
+  
+  //heroine
+  sellBtnH = new RButton(115, 40, 20, 10, "rgb(255,0,0")
+  sellBtnH.addText("Sell", 10, "rgb(0,0,0)")
+  
+  //lsd
+  sellBtnLs = new RButton(120, 10, 20, 10, "rgb(255,0,0")
+  sellBtnLs.addText("Sell", 10, "rgb(0,0,0)")
+  
+  //weed
+  sellBtnW = new RButton(120, -20, 20, 10, "rgb(255,0,0")
+  sellBtnW.addText("Sell", 10, "rgb(0,0,0)")
+  
+  //speed
+  sellBtnS = new RButton(120, -50, 20, 10, "rgb(255,0,0")
+  sellBtnS.addText("Sell", 10, "rgb(0,0,0)")
+  
+  //ludes
+  sellBtnL = new RButton(120, -80, 20, 10, "rgb(255,0,0")
+  sellBtnL.addText("Sell", 10, "rgb(0,0,0)")
+  
+  return BtnsList = [bronxBtn, ghettoBtn, centralPBtn, manhattenBtn, coneyIslandBtn, brooklynBtn, buyBtnC, buyBtnH, buyBtnLs, buyBtnW, buyBtnS, buyBtnL, sellBtnC, sellBtnH, sellBtnLs, sellBtnW, sellBtnS, sellBtnL, amtPlusOneBtn, amtPlusTenBtn, amtMinusOneBtn, amtMinusTenBtn]
+  
+end
+
+init = function()
+  Buttons()
+  
+  randEventYesBtn = new RButton(-11, -90, 20, 10, "rgb(0,255,0")
+  randEventYesBtn.addText("Yes", 10, "rgb(0,0,0)")
+  
+  randEventNoBtn = new RButton(11, -90, 20, 10, "rgb(255,0,0")
+  randEventNoBtn.addText("No", 10, "rgb(0,0,0)")
+end
+
+
+update = function()
+  updmsplus()
+  
+  UpdateCoatTotal()
+  
+  if currentEvent.ranOnce == false then
+    currentEvent.event()
+    currentEvent.ranOnce = true
+  end
+  
+  if currentEvent.buttons then
+    if randEventYesBtn.press() then
+      currentEvent.yesBtnFunc()
+    end
+    
+    if randEventNoBtn.press() then
+      currentEvent.ranOnce = false
+      currentEvent = nilEvent
+    end
+  end
+  
+  
+  if bronxBtn.press() then
+    ChangePrices()
+    dayCount += 1
+    location = "Bronx"
+    currentEvent = ChooseEvent()
+    // resets the ranOnce variable for the event function to run
+    currentEvent.ranOnce = false
+  end
+  
+  if ghettoBtn.press() then
+    ChangePrices()
+    dayCount += 1
+    location = "Ghetto"
+    currentEvent = ChooseEvent()
+    currentEvent.ranOnce = false
+  end
+  
+  if centralPBtn.press() then
+    ChangePrices()
+    dayCount += 1
+    location = "Central Park"
+    currentEvent = ChooseEvent()
+    currentEvent.ranOnce = false
+  end
+  
+  if coneyIslandBtn.press() then
+    ChangePrices()
+    dayCount += 1
+    location = "Coney Island"
+    currentEvent = ChooseEvent()
+    currentEvent.ranOnce = false
+  end
+  
+  if manhattenBtn.press() then
+    ChangePrices()
+    dayCount += 1
+    location = "Manhatten"
+    currentEvent = ChooseEvent()
+    currentEvent.ranOnce = false
+  end
+  
+  if brooklynBtn.press() then
+    ChangePrices()
+    dayCount += 1
+    location = "Brooklyn"
+    currentEvent = ChooseEvent()
+    currentEvent.ranOnce = false
+  end
+  
+  // buy and sell amount buttons
+  if amtPlusOneBtn.press() then
+    buySellAmt += 1
+  end
+  if amtPlusTenBtn.press() then
+    buySellAmt += 10
+  end
+  if amtMinusOneBtn.press() then
+    buySellAmt -= 1
+  end
+  if amtMinusTenBtn.press() then
+    buySellAmt -= 10
+  end
+  
+  // loan shark debt pay
+  // click on loan shark sprite
+  if touch.press then
+      if abs(touch.x - 0) <= 64/2 and abs(touch.y - -10) <= 64/2 then
+        if cash >= debt then
+          cash -= debt
+          debt = 0
+        end
+      end
+  end
+      
+  
+  
+  
+   // buy logic
+  
+  if buyBtnC.press() then
+     // if cash minus full price is not negative and purchase does not exceed coatMax
+     if (cash - coke.currentPrice * buySellAmt ) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= coke.currentPrice * buySellAmt
+        coat[0] += buySellAmt
+     end
+  end
+  
+  if buyBtnH.press() then
+     
+     if (cash - heroine.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= heroine.currentPrice * buySellAmt
+        coat[1] += buySellAmt
+     end
+  end
+  
+  if buyBtnLs.press() then
+     
+     if (cash - lsd.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= lsd.currentPrice * buySellAmt
+        coat[2] += buySellAmt
+     end
+  end
+  
+  
+  if buyBtnW.press() then
+     
+     if (cash - weed.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= weed.currentPrice * buySellAmt
+        coat[3] += buySellAmt
+     end
+  end
+  
+  if buyBtnS.press() then
+     
+     if (cash - speed.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= speed.currentPrice * buySellAmt
+        coat[4] += buySellAmt
+     end
+  end
+  
+  if buyBtnL.press() then
+     
+     if (cash - ludes.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= ludes.currentPrice * buySellAmt
+        coat[5] += buySellAmt
+     end
+  end
+  
+  // SELL logic
+  
+  if sellBtnC.press() then
+     // if no drugs then no sell
+     if (coat[0]) > 0 and buySellAmt <= coat[0] then
+        cash += coke.currentPrice * buySellAmt
+        coat[0] -= buySellAmt
+     end
+  end
+  
+  if sellBtnH.press() then
+     // if no drugs then no sell
+     if (coat[buySellAmt]) > 0 and buySellAmt <= coat[1]  then
+        cash += heroine.currentPrice * buySellAmt
+        coat[1] -= buySellAmt
+     end
+  end
+  
+  if sellBtnLs.press() then
+     // if no drugs then no sell
+     if (coat[2]) > 0 and buySellAmt <= coat[2] then
+        cash += lsd.currentPrice * buySellAmt
+        coat[2] -= buySellAmt
+     end
+  end
+  
+  
+  if sellBtnW.press() then
+     // if no drugs then no sell
+     if (coat[3]) > 0 and buySellAmt <= coat[3] then
+        cash += weed.currentPrice * buySellAmt
+        coat[3] -= buySellAmt
+     end
+  end
+  
+  if sellBtnS.press() then
+     // if cash minus price is not negative then continue
+     if (coat[4]) > 0 and buySellAmt <= coat[4] then 
+        cash += speed.currentPrice * buySellAmt
+        coat[4] -= buySellAmt
+     end
+  end
+  
+  if sellBtnL.press() then
+     // if cash minus price is not negative then continue
+     if (coat[5]) > 0 and buySellAmt <= coat[5] then
+        cash += ludes.currentPrice * buySellAmt
+        coat[5] -= buySellAmt
+     end
+  end
+end
+
+draw = function()
+  screen.clear()
+  
+  //Prices
+  screen.drawText("Prices", 170, 90, 15, "Red")
+  drugYVal = 70
+  for drug in drugs
+      screen.drawText(drug.name + ": "+ drug.currentPrice, 170, drugYVal, 15, "White")
+      drugYVal -= 30
+  end
+  
+  // buy and sell amount
+  screen.drawText("Amt: " + buySellAmt, 130, 90, 10)
+  
+  // coat
+  drugAmtYVal = 70
+  screen.drawText("TrenchCoat", -170, 90, 15, "Red")
+  screen.drawText("max is " + coatMax + " and \n" + "total is " + coatTotal, -170, 80, 5, "White")
+  for drug in coat
+    if drug > 0 then
+      screen.drawText(drug, -170, drugAmtYVal, 15, "White")
+    end
+    drugAmtYVal -= 30
+  end
+  
+  // cash and day
+  screen.drawText("Cash: " + cash, 0, 90, 15, "Green")
+  screen.drawText("Day: " + dayCount + "/30", 0, 75, 15, "White")
+
+  for btn in Buttons()
+    btn.draw()
+  end
+  
+  // travel
+  screen.drawText("Travel", -100, 94, 15, "White")
+  
+    
+    // loan shark
+  if debt > 0 then
+      screen.drawText("Objective: Pay back the loan shark in ", 0, 40, 8, "Red")
+      screen.drawText("30 days or else (click to pay debt)", 0, 30, 8, "Red")
+      screen.drawSprite("loansharkpixelated", 0, -10, 64, 64 )
+      screen.drawText("Debt: " + debt, 0, -50, 15,  "Red")
+  end
+  
+  
+  currentEvent.draw()
+  
+  // location
+  screen.drawText(location , -170,-93, 15, "White")
+  
+  //credits
+  screen.drawText("Original game for IBM by: John E. Dell | Remake by Kranz", 150, -97, 5)
+end
+
+
+  
+end()
+
+
+</script></html>
