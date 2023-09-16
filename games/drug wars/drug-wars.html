@@ -1235,37 +1235,39 @@ expensiveCoke.event = function()
   coke.currentPrice = round(rand(80000, 140000))
 end
 
-mugged = new RandomEvent("You were mugged on the subway", "lost 500 bucks")
+mugged = new RandomEvent("You were mugged on the subway", "lost 100 bucks")
 mugged.event = function()
-  global.cash -= 500
+  global.cash -= 100
 end
 
-newTrenchCoat = new RandomEvent("Will you buy a new trenchcoat with ", "more pockets for 300 bucks", true)
+newTrenchCoat = new RandomEvent("Will you buy a new trenchcoat with ", "50 more pockets for 700 bucks", true)
 newTrenchCoat.yesBtnFunc = function()
   global.coatMax += 50
-  global.cash -= 300
-  newTrenchCoat.text1 = "gained 50 pockets"
-  newTrenchCoat.text2 = ""
-  global.currentEvent = nilEvent
+  global.cash -= 700
+  currentEvent = nilEvent
 end
 
 foundItem
 if round(rand(0,1)) > 0.5 then
   foundItem = lsd
 else
-  foundItem = heroine
+  foundItem = weed
 end
 
+oneOrTwo = function()
+  return round(rand(1,2))
+end
 
-foundSmth = new RandomEvent("You found 1 " + foundItem.name + "off a dead dude")
+itemValue = oneOrTwo()
+
+foundSmth = new RandomEvent("You found "+ itemValue + " " + foundItem.name + " off a dead dude")
 foundSmth.event = function()
-  if foundItem.name == "Heroine" then
-    global.coat[1] += 1
+  if foundItem.name == "Weed" then
+    global.coat[3] += itemValue
   else
-    global.coat[2] += 1
+    global.coat[2] +=  itemValue
   end
 end
-
 
 randomWeed = new RandomEvent("You find some weed that smells like", "good stuff will you smoke it?", true, 6.8)
 randomWeed.yesBtnFunc = function()
@@ -1282,18 +1284,42 @@ randomWeed.yesBtnFunc = function()
   end
 end
 
+// Game over events
+// debt payed
+debtPayed = new RandomEvent("Congrats you made a lot of money" , "and escaped the loan shark NOW DO IT AGAIN", false, 8.4)
+debtPayed.event = function()
+  global.cash = 2000
+  global.dayCount = 1
+  global.location = "Bronx"
+  global.debt = 4200
+  global.coatMax = 100
+  for i=0 to 5 
+    global.coat[i] = 0
+  end
+end
 
+// debt not payed
+debtNoPayed = new RandomEvent("Your organs and " + cash +" bucks", "were harvested by the loan shark GAME OVER", false, 8.3)
+debtNoPayed.event = function()
+  global.cash = 2000
+  global.dayCount = 1
+  global.location = "Bronx"
+  global.debt = 4200
+  global.coatMax = 100
+  for i=0 to 5 
+    global.coat[i] = 0
+  end
+end
 
 nilEvent = new RandomEvent(" ", "", false)
 
-events = [newTrenchCoat, randomWeed, mugged, cheapLsd, cheapLudes, cheapWeed, cheapHeroine, expensiveCoke, expensiveHeroine, mugged, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent]
+events = [foundSmth, foundSmth, newTrenchCoat, randomWeed, mugged, cheapLsd, cheapLudes, cheapWeed, cheapHeroine, expensiveCoke, expensiveHeroine, mugged, randomWeed, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent]
 
 ChooseEvent = function()
   return events.random()
 end
 
-currentEvent = newTrenchCoat
-
+currentEvent = nilEvent
 
 // Buttons
 Buttons = function()
@@ -1421,12 +1447,15 @@ update = function()
     end
   end
   
-  
+  // TRAVEL BUTTONS
   if bronxBtn.press() then
     ChangePrices()
     dayCount += 1
     location = "Bronx"
-    currentEvent = ChooseEvent()
+    // does not change event if day 30
+    if dayCount < 30 then 
+      currentEvent = ChooseEvent()
+    end  
     // resets the ranOnce variable for the event function to run
     currentEvent.ranOnce = false
   end
@@ -1435,7 +1464,9 @@ update = function()
     ChangePrices()
     dayCount += 1
     location = "Ghetto"
-    currentEvent = ChooseEvent()
+    if dayCount < 30 then
+      currentEvent = ChooseEvent()
+    end
     currentEvent.ranOnce = false
   end
   
@@ -1443,7 +1474,9 @@ update = function()
     ChangePrices()
     dayCount += 1
     location = "Central Park"
-    currentEvent = ChooseEvent()
+    if dayCount < 30 then
+      currentEvent = ChooseEvent()
+    end
     currentEvent.ranOnce = false
   end
   
@@ -1451,7 +1484,9 @@ update = function()
     ChangePrices()
     dayCount += 1
     location = "Coney Island"
-    currentEvent = ChooseEvent()
+    if dayCount < 30 then
+      currentEvent = ChooseEvent()
+    end
     currentEvent.ranOnce = false
   end
   
@@ -1459,7 +1494,9 @@ update = function()
     ChangePrices()
     dayCount += 1
     location = "Manhatten"
-    currentEvent = ChooseEvent()
+    if dayCount < 30 then
+      currentEvent = ChooseEvent()
+    end
     currentEvent.ranOnce = false
   end
   
@@ -1467,8 +1504,20 @@ update = function()
     ChangePrices()
     dayCount += 1
     location = "Brooklyn"
-    currentEvent = ChooseEvent()
+    if dayCount < 30 then
+      currentEvent = ChooseEvent()
+    end
     currentEvent.ranOnce = false
+  end
+  
+  // END GAME
+  if dayCount >= 30 then
+    if debt > 0 then
+       currentEvent = debtNoPayed
+    end
+    if debt == 0 then
+        currentEvent = debtPayed
+    end
   end
   
   // buy and sell amount buttons
@@ -1496,9 +1545,6 @@ update = function()
       end
   end
       
-  
-  
-  
    // buy logic
   
   if buyBtnC.press() then
@@ -1610,11 +1656,13 @@ draw = function()
   drugYVal = 70
   for drug in drugs
       screen.drawText(drug.name + ": "+ drug.currentPrice, 170, drugYVal, 15, "White")
+      screen.drawText("You can afford: " + floor(cash / drug.currentPrice), 170, drugYVal - 10, 8, "rgb(255, 255, 0)")
       drugYVal -= 30
   end
-  
+
+
   // buy and sell amount
-  screen.drawText("Amt: " + buySellAmt, 130, 90, 10)
+  screen.drawText("Amt: " + buySellAmt, 130, 90, 10, "White")
   
   // coat
   drugAmtYVal = 70
@@ -1641,17 +1689,21 @@ draw = function()
     
     // loan shark
   if debt > 0 then
+      screen.drawText("Interest is 1.1x each day", 0, -60, 8, "Red")
       screen.drawText("Objective: Pay back the loan shark in ", 0, 40, 8, "Red")
       screen.drawText("30 days or else (click to pay debt)", 0, 30, 8, "Red")
       screen.drawSprite("loansharkpixelated", 0, -10, 64, 64 )
       screen.drawText("Debt: " + debt, 0, -50, 15,  "Red")
   end
   
+  // INfo
+  screen.drawText("Remember: BUY LOW, SELL HIGH!!!", 0, 60, 10, "Yellow")
+  screen.drawText("Prices fluctuate in different places so take advantage",0, 50, 6.7, "Yellow")
   
   currentEvent.draw()
   
   // location
-  screen.drawText(location , -170,-93, 15, "White")
+  screen.drawText(location , -100,-93, 15, "White")
   
   //credits
   screen.drawText("Original game for IBM by: John E. Dell | Remake by Kranz", 150, -97, 5)
