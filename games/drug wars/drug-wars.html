@@ -1138,6 +1138,8 @@ Drug = class
   end
 end
 
+// Drug objects
+meth = new Drug("Meth", 40000, 68000)
 coke = new Drug("Coke", 15000, 28000)
 heroine = new Drug("Heroine", 5000, 12000)
 lsd = new Drug("LSD", 1000, 4200)
@@ -1145,11 +1147,13 @@ weed = new Drug("Weed", 300, 720)
 speed = new Drug("Speed", 70, 220)
 ludes = new Drug("Ludes", 10, 50)
 
-drugs = [coke, heroine, lsd, weed, speed, ludes]
-coat = [cokeAmt = 0, heroineAmt = 0, lsdAmt = 0, weedAmt = 0, speedAmt = 0, ludesAmt = 0]
+
+drugs = [meth, coke, heroine, lsd, weed, speed, ludes]
+coat = [methAmt = 0, cokeAmt = 0, heroineAmt = 0, lsdAmt = 0, weedAmt = 0, speedAmt = 0, ludesAmt = 0]
 coatTotal = 0
 coatMax = 100
 cash = 2000
+endMoney = 2153
 debt = 4200
 dayCount = 1
 location = "Bronx"
@@ -1235,6 +1239,11 @@ expensiveCoke.event = function()
   coke.currentPrice = round(rand(80000, 140000))
 end
 
+expensiveMeth = new RandomEvent("OPPS BUSTED WALTER WHITE!!!", "METH PRICES ARE OUTRAGEOUS")
+expensiveMeth.event = function()
+  meth.currentPrice = round(rand(100000, 200000))  
+end
+
 mugged = new RandomEvent("You were mugged on the subway", "lost 100 bucks")
 mugged.event = function()
   global.cash -= 100
@@ -1299,8 +1308,9 @@ debtPayed.event = function()
 end
 
 // debt not payed
-debtNoPayed = new RandomEvent("Your organs and " + cash +" bucks", "were harvested by the loan shark GAME OVER", false, 8.3)
+debtNoPayed = new RandomEvent("Your organs and " + endMoney +" bucks", "were harvested by the loan shark GAME OVER", false, 8.3)
 debtNoPayed.event = function()
+  global.endMoney = cash
   global.cash = 2000
   global.dayCount = 1
   global.location = "Bronx"
@@ -1313,13 +1323,13 @@ end
 
 nilEvent = new RandomEvent(" ", "", false)
 
-events = [foundSmth, foundSmth, newTrenchCoat, randomWeed, mugged, cheapLsd, cheapLudes, cheapWeed, cheapHeroine, expensiveCoke, expensiveHeroine, mugged, randomWeed, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent]
+events = [expensiveMeth, foundSmth, foundSmth, newTrenchCoat, randomWeed, mugged, cheapLsd, cheapLudes, cheapWeed, cheapHeroine, expensiveCoke, expensiveHeroine, mugged, randomWeed, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent, nilEvent]
 
 ChooseEvent = function()
   return events.random()
 end
 
-currentEvent = nilEvent
+currentEvent = expensiveMeth
 
 // Buttons
 Buttons = function()
@@ -1361,57 +1371,66 @@ Buttons = function()
   
   // BUY BUTTONS
   
+  // meth
+  buyBtnM = new RButton(90, 70, 20, 10, "rgb(0,255,0")
+  buyBtnM.addText("Buy", 10, "rgb(0,0,0)")
+  
   //coke
-  buyBtnC = new RButton(90, 70, 20, 10, "rgb(0,255,0")
+  buyBtnC = new RButton(90, 45, 20, 10, "rgb(0,255,0")
   buyBtnC.addText("Buy", 10, "rgb(0,0,0)")
   
   //heroine
-  buyBtnH = new RButton(90, 40, 20, 10, "rgb(0,255,0")
+  buyBtnH = new RButton(90, 20, 20, 10, "rgb(0,255,0")
   buyBtnH.addText("Buy", 10, "rgb(0,0,0)")
   
   //lsd
-  buyBtnLs = new RButton(90, 10, 20, 10, "rgb(0,255,0")
+  buyBtnLs = new RButton(90, -5, 20, 10, "rgb(0,255,0")
   buyBtnLs.addText("Buy", 10, "rgb(0,0,0)")
   
   //weed
-  buyBtnW = new RButton(90, -20, 20, 10, "rgb(0,255,0")
+  buyBtnW = new RButton(90, -30, 20, 10, "rgb(0,255,0")
   buyBtnW.addText("Buy", 10, "rgb(0,0,0)")
   
   //speed
-  buyBtnS = new RButton(90, -50, 20, 10, "rgb(0,255,0")
+  buyBtnS = new RButton(90, -55, 20, 10, "rgb(0,255,0")
   buyBtnS.addText("Buy", 10, "rgb(0,0,0)")
   
   //ludes
   buyBtnL = new RButton(90, -80, 20, 10, "rgb(0,255,0")
   buyBtnL.addText("Buy", 10, "rgb(0,0,0)")
   
+  
   // SELL BUTTONS
   
+  //meth
+  sellBtnM = new RButton(120, 70, 20, 10, "rgb(255,0,0")
+  sellBtnM.addText("Sell", 10, "rgb(0,0,0)")
+  
   //coke
-  sellBtnC = new RButton(120, 70, 20, 10, "rgb(255,0,0")
+  sellBtnC = new RButton(120, 45, 20, 10, "rgb(255,0,0")
   sellBtnC.addText("Sell", 10, "rgb(0,0,0)")
   
   //heroine
-  sellBtnH = new RButton(115, 40, 20, 10, "rgb(255,0,0")
+  sellBtnH = new RButton(115, 20, 20, 10, "rgb(255,0,0")
   sellBtnH.addText("Sell", 10, "rgb(0,0,0)")
   
   //lsd
-  sellBtnLs = new RButton(120, 10, 20, 10, "rgb(255,0,0")
+  sellBtnLs = new RButton(120, -5, 20, 10, "rgb(255,0,0")
   sellBtnLs.addText("Sell", 10, "rgb(0,0,0)")
   
   //weed
-  sellBtnW = new RButton(120, -20, 20, 10, "rgb(255,0,0")
+  sellBtnW = new RButton(120, -30, 20, 10, "rgb(255,0,0")
   sellBtnW.addText("Sell", 10, "rgb(0,0,0)")
   
   //speed
-  sellBtnS = new RButton(120, -50, 20, 10, "rgb(255,0,0")
+  sellBtnS = new RButton(120, -55, 20, 10, "rgb(255,0,0")
   sellBtnS.addText("Sell", 10, "rgb(0,0,0)")
   
   //ludes
   sellBtnL = new RButton(120, -80, 20, 10, "rgb(255,0,0")
   sellBtnL.addText("Sell", 10, "rgb(0,0,0)")
   
-  return BtnsList = [bronxBtn, ghettoBtn, centralPBtn, manhattenBtn, coneyIslandBtn, brooklynBtn, buyBtnC, buyBtnH, buyBtnLs, buyBtnW, buyBtnS, buyBtnL, sellBtnC, sellBtnH, sellBtnLs, sellBtnW, sellBtnS, sellBtnL, amtPlusOneBtn, amtPlusTenBtn, amtMinusOneBtn, amtMinusTenBtn]
+  return BtnsList = [bronxBtn, ghettoBtn, centralPBtn, manhattenBtn, coneyIslandBtn, brooklynBtn, buyBtnM, buyBtnC, buyBtnH, buyBtnLs, buyBtnW, buyBtnS, buyBtnL, sellBtnM, sellBtnC, sellBtnH, sellBtnLs, sellBtnW, sellBtnS, sellBtnL, amtPlusOneBtn, amtPlusTenBtn, amtMinusOneBtn, amtMinusTenBtn]
   
 end
 
@@ -1546,12 +1565,20 @@ update = function()
   end
       
    // buy logic
+   
+   if buyBtnM.press() then
+     // if cash minus full price is not negative and purchase does not exceed coatMax
+     if (cash - meth.currentPrice * buySellAmt ) > 0 and coatTotal + buySellAmt <= coatMax then
+        cash -= meth.currentPrice * buySellAmt
+        coat[0] += buySellAmt
+     end
+    end
   
   if buyBtnC.press() then
      // if cash minus full price is not negative and purchase does not exceed coatMax
      if (cash - coke.currentPrice * buySellAmt ) > 0 and coatTotal + buySellAmt <= coatMax then
         cash -= coke.currentPrice * buySellAmt
-        coat[0] += buySellAmt
+        coat[1] += buySellAmt
      end
   end
   
@@ -1559,7 +1586,7 @@ update = function()
      
      if (cash - heroine.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
         cash -= heroine.currentPrice * buySellAmt
-        coat[1] += buySellAmt
+        coat[2] += buySellAmt
      end
   end
   
@@ -1567,7 +1594,7 @@ update = function()
      
      if (cash - lsd.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
         cash -= lsd.currentPrice * buySellAmt
-        coat[2] += buySellAmt
+        coat[3] += buySellAmt
      end
   end
   
@@ -1576,7 +1603,7 @@ update = function()
      
      if (cash - weed.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
         cash -= weed.currentPrice * buySellAmt
-        coat[3] += buySellAmt
+        coat[4] += buySellAmt
      end
   end
   
@@ -1584,7 +1611,7 @@ update = function()
      
      if (cash - speed.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
         cash -= speed.currentPrice * buySellAmt
-        coat[4] += buySellAmt
+        coat[5] += buySellAmt
      end
   end
   
@@ -1592,58 +1619,65 @@ update = function()
      
      if (cash - ludes.currentPrice * buySellAmt) > 0 and coatTotal + buySellAmt <= coatMax then
         cash -= ludes.currentPrice * buySellAmt
-        coat[5] += buySellAmt
+        coat[6] += buySellAmt
      end
   end
   
   // SELL logic
+  if sellBtnM.press() then
+     // if no drugs then no sell
+     if (coat[0]) > 0 and buySellAmt <= coat[0] then
+        cash += meth.currentPrice * buySellAmt
+        coat[0] -= buySellAmt
+     end
+  end
   
   if sellBtnC.press() then
      // if no drugs then no sell
-     if (coat[0]) > 0 and buySellAmt <= coat[0] then
+     if (coat[1]) > 0 and buySellAmt <= coat[1] then
         cash += coke.currentPrice * buySellAmt
-        coat[0] -= buySellAmt
+        coat[1] -= buySellAmt
      end
   end
   
   if sellBtnH.press() then
      // if no drugs then no sell
-     if (coat[buySellAmt]) > 0 and buySellAmt <= coat[1]  then
+     if (coat[2]) > 0 and buySellAmt <= coat[2]  then
         cash += heroine.currentPrice * buySellAmt
-        coat[1] -= buySellAmt
+        coat[2] -= buySellAmt
      end
   end
   
   if sellBtnLs.press() then
      // if no drugs then no sell
-     if (coat[2]) > 0 and buySellAmt <= coat[2] then
+     if (coat[3]) > 0 and buySellAmt <= coat[3] then
         cash += lsd.currentPrice * buySellAmt
-        coat[2] -= buySellAmt
+        coat[3] -= buySellAmt
      end
   end
   
   
   if sellBtnW.press() then
      // if no drugs then no sell
-     if (coat[3]) > 0 and buySellAmt <= coat[3] then
+     if (coat[4]) > 0 and buySellAmt <= coat[4] then
         cash += weed.currentPrice * buySellAmt
-        coat[3] -= buySellAmt
+        coat[4] -= buySellAmt
      end
   end
   
   if sellBtnS.press() then
      // if cash minus price is not negative then continue
-     if (coat[4]) > 0 and buySellAmt <= coat[4] then 
+     if (coat[5]) > 0 and buySellAmt <= coat[5] then 
         cash += speed.currentPrice * buySellAmt
-        coat[4] -= buySellAmt
+        coat[5] -= buySellAmt
      end
   end
   
   if sellBtnL.press() then
      // if cash minus price is not negative then continue
-     if (coat[5]) > 0 and buySellAmt <= coat[5] then
+     if (coat[6]) > 0 and buySellAmt <= coat[6] then
         cash += ludes.currentPrice * buySellAmt
-        coat[5] -= buySellAmt
+        coat[6] -= buySellAmt
      end
   end
 end
@@ -1657,7 +1691,7 @@ draw = function()
   for drug in drugs
       screen.drawText(drug.name + ": "+ drug.currentPrice, 170, drugYVal, 15, "White")
       screen.drawText("You can afford: " + floor(cash / drug.currentPrice), 170, drugYVal - 10, 8, "rgb(255, 255, 0)")
-      drugYVal -= 30
+      drugYVal -= 25
   end
 
 
@@ -1670,9 +1704,10 @@ draw = function()
   screen.drawText("max is " + coatMax + " and \n" + "total is " + coatTotal, -170, 80, 5, "White")
   for drug in coat
     if drug > 0 then
+      
       screen.drawText(drug, -170, drugAmtYVal, 15, "White")
     end
-    drugAmtYVal -= 30
+    drugAmtYVal -= 25
   end
   
   // cash and day
@@ -1711,6 +1746,12 @@ end
 
 
   
+end()
+
+
+
+function()
+
 end()
 
 
